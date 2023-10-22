@@ -2,6 +2,14 @@
 
 Implementation of the XPT2046 Touch controller with esp_lcd_touch component. 
 
+Note:
+1. please settings the maximum number of touchpoint to 1
+2. Apply patch_0.patch & patch_1.patch with git apply :
+```
+git apply patch_0.patch
+git apply patch_1.patch
+```
+
 | Touch controller | Communication interface | Component name | Link to datasheet |
 | :------------: | :---------------------: | :------------: | :---------------: |
 | XPT2046        | SPI                     | esp_lcd_touch_xpt2046     | [Specification](https://grobotronics.com/images/datasheets/xpt2046-datasheet.pdf) |
