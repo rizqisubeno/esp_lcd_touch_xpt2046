@@ -5,7 +5,7 @@ Implementation of the XPT2046 Touch controller with esp_lcd_touch component.
 Note:
 1. Adding esp_lcd_touch to components on your esp32 projects
 ```
- idf.py add-dependency "espressif/esp_lcd_touch^1.1.0"  
+ idf.py add-dependency "espressif/esp_lcd_touch"  
 ```
 2. please settings the maximum number of touchpoint to 1
 3. Apply patch_0.patch & patch_1.patch with git apply :
