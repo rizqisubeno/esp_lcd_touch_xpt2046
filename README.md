@@ -82,7 +82,7 @@ This will read new data from the touch controller and store it in SRAM. This met
 should be called on a regular basis.
 
 ```
-    ESP_ERROR_CHECK(esp_lcd_touch_read_data(tp));
+    ESP_ERROR_CHECK(esp_lcd_touch_read_data(indev_drv));
 ```
 
 ### Retrieving touch point(s)
@@ -95,7 +95,7 @@ This will retrieve the latest averaged touch point data from SRAM.
     uint16_t  strength[1];
     uint8_t count = 0;
 
-    bool touchpad_pressed = esp_lcd_touch_get_coordinates(tp, x, y, strength, &count, 1);
+    bool touchpad_pressed = esp_lcd_touch_get_coordinates(indev_drv, x, y, strength, &count, 1);
 ```
 
 ### Integrating with LVGL
@@ -111,11 +111,11 @@ void touch_driver_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
     uint8_t count = 0;
 
     // Update touch point data.
-    ESP_ERROR_CHECK(esp_lcd_touch_read_data(tp));
+    ESP_ERROR_CHECK(esp_lcd_touch_read_data(indev_drv->user_data));
 
     data->state = LV_INDEV_STATE_REL;
 
-    if (esp_lcd_touch_get_coordinates(tp, x, y, strength, &count, 1))
+    if (esp_lcd_touch_get_coordinates(indev_drv->user_data, x, y, strength, &count, 1))
     {
         data->point.x = x[0];
         data->point.y = y[0];
