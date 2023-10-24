@@ -1,10 +1,11 @@
---- a/esp_lcd_touch_xpt2046.c	2023-10-22 14:51:27.825748777 +0700
-+++ b/esp_lcd_touch_xpt2046.c	2023-10-22 14:53:05.814813634 +0700
-@@ -17,18 +17,17 @@
+--- a/esp_lcd_touch_xpt2046.c	2023-10-24 08:04:47.286934859 +0700
++++ b/esp_lcd_touch_xpt2046.c	2023-10-24 08:07:18.470264266 +0700
+@@ -17,18 +17,18 @@
  #include <memory.h>
  
  #include "sdkconfig.h"
 +#include "include/esp_lcd_touch_xpt2046.h"
++#include "include/util.h"
  
  static const char *TAG = "xpt2046";
  
@@ -25,7 +26,7 @@
  };
  
  #if CONFIG_XPT2046_ENABLE_LOCKING
-@@ -40,6 +39,14 @@
+@@ -40,6 +40,14 @@
  #endif
  
  static const uint16_t XPT2046_ADC_LIMIT = 4096;
@@ -35,12 +36,12 @@
 +uint32_t avg_buf_x[XPT2046_AVG];
 +uint32_t avg_buf_y[XPT2046_AVG];
 +uint8_t avg_last;
-+uint32_t x_offset = 0, y_offset = 0;
++uint32_t x_scale = 0, y_scale = 0;
 +
  static esp_err_t xpt2046_read_data(esp_lcd_touch_handle_t tp);
  static bool xpt2046_get_xy(esp_lcd_touch_handle_t tp,
                             uint16_t *x, uint16_t *y,
-@@ -47,6 +54,12 @@
+@@ -47,6 +55,12 @@
                             uint8_t *point_num,
                             uint8_t max_point_num);
  static esp_err_t xpt2046_del(esp_lcd_touch_handle_t tp);
@@ -53,7 +54,7 @@
  
  esp_err_t esp_lcd_touch_new_spi_xpt2046(const esp_lcd_panel_io_handle_t io,
                                          const esp_lcd_touch_config_t *config,
-@@ -78,8 +91,12 @@
+@@ -78,8 +92,12 @@
          gpio_config_t cfg;
          memset(&cfg, 0, sizeof(gpio_config_t));
          esp_rom_gpio_pad_select_gpio(config->int_gpio_num);
@@ -66,7 +67,7 @@
  
          // If the user has provided a callback routine for the interrupt enable
          // the interrupt mode on the negative edge.
-@@ -98,6 +115,13 @@
+@@ -98,6 +116,13 @@
          }
      }
  
@@ -80,7 +81,7 @@
  err:
      if (ret != ESP_OK)
      {
-@@ -135,6 +159,47 @@
+@@ -135,6 +160,47 @@
      return ESP_OK;
  }
  
@@ -128,7 +129,7 @@
  static esp_err_t xpt2046_read_data(esp_lcd_touch_handle_t tp)
  {
      uint16_t z1 = 0, z2 = 0, z = 0;
-@@ -147,9 +212,12 @@
+@@ -147,9 +213,12 @@
      // Convert the received values into a Z value.
      z = (z1 >> 3) + (XPT2046_ADC_LIMIT - (z2 >> 3));
  
@@ -142,7 +143,7 @@
      {
          uint16_t discard_buf = 0;
  
-@@ -170,7 +238,8 @@
+@@ -170,7 +239,8 @@
  #if CONFIG_XPT2046_CONVERT_ADC_TO_COORDS
              // Convert the raw ADC value into a screen coordinate and store it
              // for averaging.
@@ -152,7 +153,7 @@
  #else
              // store the raw ADC values and let the user convert them to screen
              // coordinates.
-@@ -186,12 +255,29 @@
+@@ -186,12 +256,30 @@
  #if CONFIG_XPT2046_CONVERT_ADC_TO_COORDS
              // Convert the raw ADC value into a screen coordinate and store it
              // for averaging.
@@ -178,12 +179,13 @@
 +                first_set_buf_avg(&x_temp, &y_temp);
 +            }
 +            xpt2046_avg(&x_temp, &y_temp);
-+            x = x_temp+x_offset;
-+            y = y_temp+y_offset;
++            //this value is trial and error experiment on lcd touch
++            x = (uint16_t)scale(x_temp,18,218,10,230);
++            y = (uint16_t)scale(y_temp,20,290,5,290);
          }
  
          // Average the accumulated coordinate data points.
-@@ -199,6 +285,14 @@
+@@ -199,6 +287,14 @@
          y /= CONFIG_ESP_LCD_TOUCH_MAX_POINTS;
          point_count = 1;
      }
@@ -198,7 +200,7 @@
  
      XPT2046_LOCK(&tp->data.lock);
      tp->data.coords[0].x = x;
-@@ -206,6 +300,8 @@
+@@ -206,6 +302,8 @@
      tp->data.coords[0].strength = z;
      tp->data.points = point_count;
      XPT2046_UNLOCK(&tp->data.lock);
@@ -207,7 +209,7 @@
  
      return ESP_OK;
  }
-@@ -253,21 +349,3 @@
+@@ -253,21 +351,3 @@
  
      return (*point_num > 0);
  }
