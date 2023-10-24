@@ -277,6 +277,7 @@ static esp_err_t xpt2046_read_data(esp_lcd_touch_handle_t tp)
                 first_set_buf_avg(&x_temp, &y_temp);
             }
             xpt2046_avg(&x_temp, &y_temp);
+            // this value is get by trial and error on LCD
             x = (uint16_t)scale(x_temp,18,218,10,230);
             y = (uint16_t)scale(y_temp,20,290,5,290);
         }
