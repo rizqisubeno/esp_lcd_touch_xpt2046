@@ -22,20 +22,6 @@ git apply patch_1.patch
 
 This package can be added to your project in two ways:
 
-1. Using [Espressif's component service](https://components.espressif.com/) as:
-```
-dependencies:
-  atanisoft/esp_lcd_touch_xpt2046: "~1.0.0"
-```
-
-2. Using the git repository directly:
-
-```
-dependencies:
-  esp_lcd_touch_xpt2046:
-    git: https://github.com/atanisoft/esp_lcd_touch_xpt2046.git
-```
-
 For more information on the usage of the `idf_component.yml` file please refer to [Espressif's documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-component-manager.html).
 
 ## Supported platforms
